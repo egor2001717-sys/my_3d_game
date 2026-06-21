@@ -3,35 +3,13 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - name: Build APK with Official Kivy Buildozer Action
+      uses: kivy/buildozer-action@v1
       with:
-        python-version: '3.10'
-
-    - name: Install System Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libncurses5-dev zlib1g-dev unzip make gcc g++ autoconf autotools-dev automake libtool split python3-pip openjdk-17-jdk
-        pip install --upgrade pip setuptools virtualenv
-        pip install "cython<3.0.0" buildozer kivy
-
-    - name: Create buildozer.spec
-      run: |
-        buildozer init
-        sed -i 's/# android.accept_sdk_license = False/android.accept_sdk_license = True/' buildozer.spec
-        sed -i 's/requirements = python3,kivy/requirements = python3,kivy/' buildozer.spec
-
-    - name: Build Android APK
-      run: buildozer -v android debug
-
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: my-3d-game
-        path: bin/*.apk
+        COMMAND: buildozer -v android debug
