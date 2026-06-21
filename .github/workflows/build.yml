@@ -1,0 +1,37 @@
+name: Build APK
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libncurses5-dev zlib1g-dev unzip make gcc g++ autoconf autotools-dev automake libtool split python3-pip
+        pip install --upgrade buildozer cython kivy
+
+    - name: Init Buildozer
+      run: buildozer init
+
+    - name: Configure buildozer.spec
+      run: |
+        sed -i 's/# android.accept_sdk_license = False/android.accept_sdk_license = True/' buildozer.spec
+
+    - name: Build Android APK
+      run: buildozer -v android debug
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: my-3d-game
+        path: bin/*.apk
